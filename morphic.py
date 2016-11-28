@@ -157,7 +157,7 @@ class Point:
         if direction == 'vertical':
             return Point(self.x, center.y * 2 - self.y)
         elif direction == 'horizontal':
-            return Point(center,x * 2 - self.x, self.y)
+            return Point(center.x * 2 - self.x, self.y)
         else:
             return NotImplemented
 
