@@ -151,7 +151,7 @@ class Point:
         else:
             return NotImplemented
     
-    def flip(self, directon, center):
+    def flip(self, direction, center):
         "direction must be 'vertical' or 'horizontal'"
 
         if direction == 'vertical':
