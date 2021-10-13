@@ -143,7 +143,7 @@ class Point:
         "direction must be 'right', 'left' or 'pi'"
         offset = self - center
         if direction == 'right':
-            return Point(-offset.y, offset,y) + center
+            return Point(-offset.y, offset.y) + center
         elif direction == 'left':
             return Point(offset.y, -offset.y) + center
         elif direction == 'pi':
@@ -2045,7 +2045,7 @@ class TextCursor(Blinker):
     #TextCursor event-processing:
 
     def process_keyboard_event(self, event):
-        code = event.dict["key"]
+        code = event.key
         if code == 276:
             self.go_left()
         elif code == 275:
@@ -2063,7 +2063,7 @@ class TextCursor(Blinker):
         elif code == 27:
             self.cancel()
         elif 31 < code < 128:
-            self.insert(event.dict["unicode"])
+            self.insert(event.unicode)
 
     #TextCursor navigation:
 
@@ -2138,7 +2138,7 @@ class TextCursor(Blinker):
         self.go_left()
 
 class Text(Morph):
-    "I am a mult line, word wrapping string"
+    "I am a multiline, word wrapping string"
 
     def __init__(self,
                  text,
@@ -2405,8 +2405,7 @@ class Hand(Morph):
         if self.children != []:
             self.drop()
         else:
-            pos = Point(event.dict["pos"][0],
-                        event.dict["pos"][1])
+            pos = Point(*event.pos[0:2])
             morph = self.morph_at_pointer()
 
             is_menu_click = False
@@ -2427,11 +2426,11 @@ class Hand(Morph):
             while not morph.handles_mouse_click():
                 morph = morph.parent
             self.mouse_down_morph = morph
-            if event.dict["button"] == 1:
+            if event.button == 1:
                 morph.mouse_down_left(pos)
-            elif event.dict["button"] == 2:
+            elif event.button == 2:
                 morph.mouse_down_middle(pos)
-            elif event.dict["button"] == 3:
+            elif event.button == 3:
                 morph.mouse_down_right(pos)
             else:
                 pass
@@ -2440,8 +2439,7 @@ class Hand(Morph):
         if self.children != []:
             self.drop()
         else:
-            pos = Point(event.dict["pos"][0],
-                        event.dict["pos"][1])
+            pos = Point(*event.pos[0:2])
             morph = self.morph_at_pointer()
 
             is_menu_click = False
@@ -2449,22 +2447,22 @@ class Hand(Morph):
                 if isinstance(m, Menu) or isinstance(m, Widget):
                     is_menu_click = True
 
-            if event.dict["button"] == 3 and not is_menu_click:
+            if event.button == 3 and not is_menu_click:
                 menu = morph.context_menu()
                 if menu != None:
                     menu.popup_at_hand()
             
             while not morph.handles_mouse_click():
                 morph = morph.parent
-            if event.dict["button"] == 1:
+            if event.button == 1:
                 morph.mouse_up_left(pos)
                 if morph is self.mouse_down_morph:
                     morph.mouse_click_left(pos)
-            elif event.dict["button"] == 2 and not is_menu_click:
+            elif event.button == 2 and not is_menu_click:
                 morph.mouse_up_middle(pos)
                 if morph is self.mouse_down_morph:
                     morph.mouse_click_middle(pos)
-            elif event.dict["button"] == 3 and not is_menu_click:
+            elif event.button == 3 and not is_menu_click:
                 morph.mouse_up_right(pos)
                 if morph is self.mouse_down_morph:
                     morph.mouse_click_right(pos)
@@ -2473,11 +2471,10 @@ class Hand(Morph):
 
     def process_mouse_move(self, event):
         mouse_over_new = self.all_morphs_at_pointer()
-        if self.children == [] and event.dict["buttons"][0] == 1:
+        if self.children == [] and event.buttons[0] == 1:
             top_morph = self.morph_at_pointer()
             if top_morph.handles_mouse_move():
-                pos = Point(event.dict["pos"][0],
-                            event.dict["pos"][1])
+                pos = Point(*event.pos[0:2])
                 top_morph.mouse_move(pos)
             morph = top_morph.root_for_grab()
             if morph is self.morph_to_grab and morph.is_draggable:
@@ -2485,12 +2482,12 @@ class Hand(Morph):
         for old in self.mouse_over_list:
             if old not in mouse_over_new and old.handles_mouse_over():
                 old.mouse_leave()
-                if event.dict["buttons"][0] == 1:
+                if event.buttons[0] == 1:
                     old.mouse_leave_dragging()
         for new in mouse_over_new: 
             if new not in self.mouse_over_list and new.handles_mouse_over():
                 new.mouse_enter()
-                if event.dict["buttons"][0] == 1:
+                if event.buttons[0] == 1:
                     new.mouse_enter_dragging()
         self.mouse_over_list = mouse_over_new
 
